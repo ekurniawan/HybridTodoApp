@@ -2,7 +2,8 @@
 @using HybridTodoApp.Data
 @inject TodoService TodoService
 @inject IConnectivity ConnectivityService 
-
+@inject IGeolocation GeolocationService
+@inject IGeocoding GeocodingService
 
 <h3>Todo (@todos.Count(Todo=>!Todo.IsDone))</h3>
 
@@ -13,26 +14,60 @@
     </div>
 }
 
+@if(!string.IsNullOrEmpty(locationStatus))
+{
+    <div class="alert alert-info">
+        @((MarkupString)locationStatus)
+    </div>
+}
+
 <ul>
     @foreach (var todo in todos)
     {
         <li>
             <input type="checkbox" @bind="todo.IsDone" />
             <span style="@(todo.IsDone ? "text-decoration: line-through;" : "")">@todo.Title</span>
+            @if (!string.IsNullOrEmpty(todo.LocationName))
+            {
+                <small class="text-muted"> - 📍 @todo.LocationName</small>
+            }
+            else if (todo.Latitude.HasValue && todo.Longitude.HasValue)
+            {
+                <small class="text-muted"> - Lat: @todo.Latitude.Value.ToString("F4"), Lng: @todo.Longitude.Value.ToString("F4")</small>
+            }
         </li>
     }
 </ul>
 
-<input placeholder="Something todo.." @bind="newTodo" />
-<button @onclick="AddTodo" class="btn btn-warning">Add</button>
-<button @onclick="Save" class="btn btn-primary">Save</button>
-<button @onclick="Upload" class="btn btn-danger">Upload</button>
+<div class="input-group mb-3">
+    <input placeholder="Something todo.." @bind="newTodo" class="form-control" />
+    <button @onclick="GetLocation" class="btn btn-info" disabled="@isGettingLocation">
+        @if (isGettingLocation)
+        {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+        }
+        📍 Get Location
+    </button>
+</div>
+
+<div class="btn-group mb-3" role="group">
+    <button @onclick="AddTodo" class="btn btn-warning">Add</button>
+    <button @onclick="Save" class="btn btn-primary">Save</button>
+    <button @onclick="Upload" class="btn btn-danger">Upload</button>
+</div>
 
 @code {
     List<TodoItem> todos = new List<TodoItem>{};
 
     string newTodo = string.Empty;
     bool hasInternet = true;
+    bool isGettingLocation = false;
+    string locationStatus = string.Empty;
+    
+    // Current location for new todos
+    double? currentLatitude;
+    double? currentLongitude;
+    string? currentLocationName;
 
     protected override void OnInitialized()
     {
@@ -46,8 +81,153 @@
     {
         if (string.IsNullOrWhiteSpace(newTodo))
             return;
-        todos.Add(new TodoItem { Title = newTodo, IsDone = false });
+            
+        var newTodoItem = new TodoItem 
+        { 
+            Title = newTodo, 
+            IsDone = false,
+            Latitude = currentLatitude,
+            Longitude = currentLongitude,
+            LocationName = currentLocationName
+        };
+        
+        todos.Add(newTodoItem);
         newTodo = string.Empty;
+        
+        // Clear location after adding todo
+        ClearLocation();
+    }
+
+    async Task GetLocation()
+    {
+        try
+        {
+            isGettingLocation = true;
+            locationStatus = "📍 Getting location...";
+            StateHasChanged();
+
+            var location = await GeolocationService.GetLocationAsync(new GeolocationRequest
+            {
+                DesiredAccuracy = GeolocationAccuracy.Medium,
+                Timeout = TimeSpan.FromSeconds(10)
+            });
+
+            if (location != null)
+            {
+                currentLatitude = location.Latitude;
+                currentLongitude = location.Longitude;
+                
+                locationStatus = "🔍 Getting address details...";
+                StateHasChanged();
+
+                // Try to get a human-readable location name
+                try
+                {
+                    var placemarks = await GeocodingService.GetPlacemarksAsync(location.Latitude, location.Longitude);
+                    var placemark = placemarks?.FirstOrDefault();
+                    
+                    if (placemark != null)
+                    {
+                        // Build a readable location name for saving with todo
+                        var locationParts = new List<string>();
+                        
+                        if (!string.IsNullOrEmpty(placemark.FeatureName))
+                            locationParts.Add(placemark.FeatureName);
+                        if (!string.IsNullOrEmpty(placemark.Thoroughfare))
+                            locationParts.Add(placemark.Thoroughfare);
+                        if (!string.IsNullOrEmpty(placemark.Locality))
+                            locationParts.Add(placemark.Locality);
+                        if (!string.IsNullOrEmpty(placemark.AdminArea))
+                            locationParts.Add(placemark.AdminArea);
+                        if (!string.IsNullOrEmpty(placemark.CountryName))
+                            locationParts.Add(placemark.CountryName);
+
+                        currentLocationName = locationParts.Count > 0 
+                            ? string.Join(", ", locationParts.Take(3)) // Limit to first 3 parts for brevity
+                            : $"Lat: {location.Latitude:F4}, Lng: {location.Longitude:F4}";
+
+                        // Build detailed address for status display
+                        var addressLines = new List<string>();
+                        
+                        if (!string.IsNullOrEmpty(placemark.FeatureName) && !string.IsNullOrEmpty(placemark.Thoroughfare))
+                            addressLines.Add($"<strong>📍 {placemark.FeatureName}</strong>");
+                        else if (!string.IsNullOrEmpty(placemark.FeatureName))
+                            addressLines.Add($"<strong>📍 {placemark.FeatureName}</strong>");
+                        else if (!string.IsNullOrEmpty(placemark.Thoroughfare))
+                            addressLines.Add($"<strong>📍 {placemark.Thoroughfare}</strong>");
+
+                        if (!string.IsNullOrEmpty(placemark.SubThoroughfare) && !string.IsNullOrEmpty(placemark.Thoroughfare))
+                            addressLines.Add($"🏠 {placemark.SubThoroughfare} {placemark.Thoroughfare}");
+                        
+                        if (!string.IsNullOrEmpty(placemark.Locality))
+                            addressLines.Add($"🏙️ {placemark.Locality}");
+                        
+                        if (!string.IsNullOrEmpty(placemark.SubAdminArea) && placemark.SubAdminArea != placemark.Locality)
+                            addressLines.Add($"📍 {placemark.SubAdminArea}");
+                        
+                        if (!string.IsNullOrEmpty(placemark.AdminArea))
+                            addressLines.Add($"🗺️ {placemark.AdminArea}");
+                        
+                        if (!string.IsNullOrEmpty(placemark.PostalCode))
+                            addressLines.Add($"📮 {placemark.PostalCode}");
+                        
+                        if (!string.IsNullOrEmpty(placemark.CountryName))
+                            addressLines.Add($"🌍 {placemark.CountryName}");
+
+                        addressLines.Add($"📐 Coordinates: {location.Latitude:F6}, {location.Longitude:F6}");
+
+                        locationStatus = addressLines.Count > 1 
+                            ? string.Join("<br/>", addressLines)
+                            : $"📍 Location acquired: {currentLocationName}<br/>📐 Coordinates: {location.Latitude:F6}, {location.Longitude:F6}";
+                    }
+                    else
+                    {
+                        currentLocationName = $"Lat: {location.Latitude:F4}, Lng: {location.Longitude:F4}";
+                        locationStatus = $"📍 Location acquired<br/>📐 Coordinates: {location.Latitude:F6}, {location.Longitude:F6}";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // If geocoding fails, fall back to coordinates
+                    currentLocationName = $"Lat: {location.Latitude:F4}, Lng: {location.Longitude:F4}";
+                    locationStatus = $"📍 Location acquired (geocoding failed)<br/>📐 Coordinates: {location.Latitude:F6}, {location.Longitude:F6}<br/>⚠️ {ex.Message}";
+                    System.Diagnostics.Debug.WriteLine($"Geocoding error: {ex.Message}");
+                }
+            }
+            else
+            {
+                locationStatus = "❌ Unable to get location.";
+            }
+        }
+        catch (FeatureNotSupportedException)
+        {
+            locationStatus = "❌ Geolocation is not supported on this device.";
+        }
+        catch (FeatureNotEnabledException)
+        {
+            locationStatus = "❌ Geolocation is not enabled. Please enable location services.";
+        }
+        catch (PermissionException)
+        {
+            locationStatus = "❌ Location permission denied. Please grant location permission.";
+        }
+        catch (Exception ex)
+        {
+            locationStatus = $"❌ Error getting location: {ex.Message}";
+        }
+        finally
+        {
+            isGettingLocation = false;
+            StateHasChanged();
+        }
+    }
+
+    void ClearLocation()
+    {
+        currentLatitude = null;
+        currentLongitude = null;
+        currentLocationName = null;
+        locationStatus = string.Empty;
     }
 
     void Upload()

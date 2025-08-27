@@ -10,5 +10,8 @@ namespace HybridTodoApp.Data
     {
         public string? Title { get; set; } = string.Empty;
         public bool IsDone { get; set; } = false;
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public string? LocationName { get; set; }
     }
 }
