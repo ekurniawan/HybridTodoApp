@@ -23,6 +23,9 @@ namespace HybridTodoApp
 #endif
 
             builder.Services.AddSingleton<TodoService>();
+            builder.Services.AddSingleton<IConnectivity>(c => Connectivity.Current);
+            //add geolocation service
+            builder.Services.AddSingleton<IGeolocation>(c => Geolocation.Default);
 
             return builder.Build();
         }
