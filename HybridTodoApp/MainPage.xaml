@@ -1,18 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:HybridTodoApp"
+             xmlns:pages="clr-namespace:HybridTodoApp.Components.Pages"
              xmlns:components="clr-namespace:HybridTodoApp.Components"
              x:Class="HybridTodoApp.MainPage">
 
-    <Grid RowDefinitions="*,Auto">
-        <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+
+    <ContentPage Title="Home">
+        <BlazorWebView HostPage="wwwroot/index.html">
             <BlazorWebView.RootComponents>
-                <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
+                <RootComponent Selector="#app" ComponentType="{x:Type pages:Home}" />
             </BlazorWebView.RootComponents>
         </BlazorWebView>
-        <Button Text="Native Button !" Margin="10" Grid.Row="1" Clicked="Button_Clicked" />
-    </Grid>
-   
-
-</ContentPage>
+    </ContentPage>
+    <ContentPage Title="Count">
+        <BlazorWebView HostPage="wwwroot/index.html">
+            <BlazorWebView.RootComponents>
+                <RootComponent Selector="#app" ComponentType="{x:Type pages:Counter}" />
+            </BlazorWebView.RootComponents>
+        </BlazorWebView>
+    </ContentPage>
+    <ContentPage Title="Weather">
+        <BlazorWebView HostPage="wwwroot/index.html">
+            <BlazorWebView.RootComponents>
+                <RootComponent Selector="#app" ComponentType="{x:Type pages:Weather}" />
+            </BlazorWebView.RootComponents>
+        </BlazorWebView>
+    </ContentPage>
+    <ContentPage Title="Todo List">
+        <BlazorWebView HostPage="wwwroot/index.html">
+            <BlazorWebView.RootComponents>
+                <RootComponent Selector="#app" ComponentType="{x:Type pages:Todo}" />
+            </BlazorWebView.RootComponents>
+        </BlazorWebView>
+    </ContentPage>
+    <pages:NewPage1 Title="New Page 1" />
+</TabbedPage>
