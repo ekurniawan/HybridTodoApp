@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HybridTodoApp.Data;
+using Microsoft.Extensions.Logging;
 
 namespace HybridTodoApp
 {
@@ -17,9 +18,11 @@ namespace HybridTodoApp
             builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Logging.AddDebug();
 #endif
+
+            builder.Services.AddSingleton<TodoService>();
 
             return builder.Build();
         }

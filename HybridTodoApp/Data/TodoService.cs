@@ -22,5 +22,14 @@ namespace HybridTodoApp.Data
             var json = JsonSerializer.Serialize(items);
             File.WriteAllText(file, json);
         }
+
+        public IEnumerable<TodoItem> LoadItems()
+        {
+            if (!File.Exists(file))
+                return Enumerable.Empty<TodoItem>();
+
+            var json = File.ReadAllText(file);
+            return JsonSerializer.Deserialize<IEnumerable<TodoItem>>(json) ?? Enumerable.Empty<TodoItem>();
+        }
     }
 }
