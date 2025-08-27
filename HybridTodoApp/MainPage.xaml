@@ -5,10 +5,14 @@
              xmlns:components="clr-namespace:HybridTodoApp.Components"
              x:Class="HybridTodoApp.MainPage">
 
-    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
-        <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
-        </BlazorWebView.RootComponents>
-    </BlazorWebView>
+    <Grid RowDefinitions="*,Auto">
+        <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+            <BlazorWebView.RootComponents>
+                <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
+            </BlazorWebView.RootComponents>
+        </BlazorWebView>
+        <Button Text="Native Button !" Margin="10" Grid.Row="1" Clicked="Button_Clicked" />
+    </Grid>
+   
 
 </ContentPage>
