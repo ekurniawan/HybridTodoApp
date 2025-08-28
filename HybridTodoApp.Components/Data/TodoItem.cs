@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HybridTodoApp.Data
+namespace HybridTodoApp.Components.Data
 {
     public class TodoItem
     {

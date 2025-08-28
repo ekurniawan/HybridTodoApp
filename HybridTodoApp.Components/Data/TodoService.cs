@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace HybridTodoApp.Data
+namespace HybridTodoApp.Components.Data
 {
     public class TodoService
     {

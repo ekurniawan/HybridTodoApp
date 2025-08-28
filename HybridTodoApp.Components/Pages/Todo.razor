@@ -1,5 +1,9 @@
 ﻿@page "/todo"
-@using HybridTodoApp.Data
+@using HybridTodoApp.Components.Data
+@using Microsoft.Maui.ApplicationModel
+@using Microsoft.Maui.Devices.Sensors
+@using Microsoft.Maui.Networking
+
 @inject TodoService TodoService
 @inject IConnectivity ConnectivityService 
 @inject IGeolocation GeolocationService

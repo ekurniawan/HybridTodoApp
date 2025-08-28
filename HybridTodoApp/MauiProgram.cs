@@ -1,4 +1,4 @@
-﻿using HybridTodoApp.Data;
+﻿using HybridTodoApp.Components.Data;
 using Microsoft.Extensions.Logging;
 
 namespace HybridTodoApp
