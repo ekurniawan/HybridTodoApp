@@ -37,37 +37,41 @@ app.Run();
 
 public class BlazorConnectivity : IConnectivity
 {
-    public IEnumerable<ConnectionProfile> ConnectionProfiles => throw new NotImplementedException();
-    public NetworkAccess NetworkAccess => throw new NotImplementedException();
+    public IEnumerable<ConnectionProfile> ConnectionProfiles => new List<ConnectionProfile> { ConnectionProfile.Unknown };
+    public NetworkAccess NetworkAccess => NetworkAccess.Internet; // Assume internet is available in web browser
 
     public event EventHandler<ConnectivityChangedEventArgs> ConnectivityChanged;
 }
 
 public class BlazorGeolocation : IGeolocation
 {
-    public bool IsListeningForeground => throw new NotImplementedException();
+    public bool IsListeningForeground => false;
 
     public event EventHandler<GeolocationLocationChangedEventArgs>? LocationChanged;
     public event EventHandler<GeolocationListeningFailedEventArgs>? ListeningFailed;
 
     public Task<Location?> GetLastKnownLocationAsync()
     {
-        throw new NotImplementedException();
+        // Return null since we can't get last known location in web browser without user permission
+        return Task.FromResult<Location?>(null);
     }
 
-    public Task<Location?> GetLocationAsync(GeolocationRequest request, CancellationToken cancelToken)
+    public Task<Location?> GetLocationAsync(GeolocationRequest request, CancellationToken cancelToken = default)
     {
-        throw new NotImplementedException();
+        // For web browsers, geolocation requires JavaScript APIs that aren't directly available
+        // Return null to indicate location is not available
+        return Task.FromResult<Location?>(null);
     }
 
     public Task<bool> StartListeningForegroundAsync(GeolocationListeningRequest request)
     {
-        throw new NotImplementedException();
+        // Not supported in web browsers through this interface
+        return Task.FromResult(false);
     }
 
     public void StopListeningForeground()
     {
-        throw new NotImplementedException();
+        // Nothing to stop
     }
 }
 
@@ -75,11 +79,13 @@ public class BlazorGeocoding : IGeocoding
 {
     public Task<IEnumerable<Location>> GetLocationsAsync(string address)
     {
-        throw new NotImplementedException();
+        // Geocoding is not available in this web implementation
+        return Task.FromResult(Enumerable.Empty<Location>());
     }
 
     public Task<IEnumerable<Placemark>> GetPlacemarksAsync(double latitude, double longitude)
     {
-        throw new NotImplementedException();
+        // Reverse geocoding is not available in this web implementation
+        return Task.FromResult(Enumerable.Empty<Placemark>());
     }
 }
