@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HybridTodoApp.WinForms</RootNamespace>
+    <AssemblyName>HybridTodoApp.WinForms</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HybridTodoApp.Components\HybridTodoApp.Components.csproj" />
+  </ItemGroup>
+
+</Project>

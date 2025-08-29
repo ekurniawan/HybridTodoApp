@@ -37,8 +37,8 @@ app.Run();
 
 public class BlazorConnectivity : IConnectivity
 {
-    public IEnumerable<ConnectionProfile> ConnectionProfiles => new List<ConnectionProfile> { ConnectionProfile.Unknown };
-    public NetworkAccess NetworkAccess => NetworkAccess.Internet; // Assume internet is available in web browser
+    public IEnumerable<ConnectionProfile> ConnectionProfiles => new[] { ConnectionProfile.WiFi };
+    public NetworkAccess NetworkAccess => NetworkAccess.Internet;
 
     public event EventHandler<ConnectivityChangedEventArgs> ConnectivityChanged;
 }
@@ -52,26 +52,23 @@ public class BlazorGeolocation : IGeolocation
 
     public Task<Location?> GetLastKnownLocationAsync()
     {
-        // Return null since we can't get last known location in web browser without user permission
         return Task.FromResult<Location?>(null);
     }
 
-    public Task<Location?> GetLocationAsync(GeolocationRequest request, CancellationToken cancelToken = default)
+    public Task<Location?> GetLocationAsync(GeolocationRequest request, CancellationToken cancelToken)
     {
-        // For web browsers, geolocation requires JavaScript APIs that aren't directly available
-        // Return null to indicate location is not available
+        // For web, we can't access location directly, return null
         return Task.FromResult<Location?>(null);
     }
 
     public Task<bool> StartListeningForegroundAsync(GeolocationListeningRequest request)
     {
-        // Not supported in web browsers through this interface
         return Task.FromResult(false);
     }
 
     public void StopListeningForeground()
     {
-        // Nothing to stop
+        // No implementation needed for web
     }
 }
 
@@ -79,13 +76,13 @@ public class BlazorGeocoding : IGeocoding
 {
     public Task<IEnumerable<Location>> GetLocationsAsync(string address)
     {
-        // Geocoding is not available in this web implementation
+        // For web, we can't access geocoding directly, return empty collection
         return Task.FromResult(Enumerable.Empty<Location>());
     }
 
     public Task<IEnumerable<Placemark>> GetPlacemarksAsync(double latitude, double longitude)
     {
-        // Reverse geocoding is not available in this web implementation
+        // For web, we can't access geocoding directly, return empty collection
         return Task.FromResult(Enumerable.Empty<Placemark>());
     }
 }

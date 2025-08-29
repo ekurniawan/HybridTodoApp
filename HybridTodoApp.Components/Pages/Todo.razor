@@ -29,7 +29,7 @@
     @foreach (var todo in todos)
     {
         <li>
-            <input type="checkbox" @bind="todo.IsDone" />
+            <input type="checkbox" @bind="todo.IsDone" @bind:after="() => StateHasChanged()" />
             <span style="@(todo.IsDone ? "text-decoration: line-through;" : "")">@todo.Title</span>
             @if (!string.IsNullOrEmpty(todo.LocationName))
             {
@@ -100,6 +100,9 @@
         
         // Clear location after adding todo
         ClearLocation();
+        
+        // Trigger UI refresh
+        StateHasChanged();
     }
 
     async Task GetLocation()
@@ -244,5 +247,12 @@
     void Save()
     {
         TodoService.SaveItems(todos);
+        StateHasChanged();
+    }
+
+    void ToggleTodoCompletion(TodoItem todo)
+    {
+        todo.IsDone = !todo.IsDone;
+        StateHasChanged();
     }
 }
